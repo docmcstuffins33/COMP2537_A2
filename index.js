@@ -46,28 +46,14 @@ app.use(session({
 }
 ));
 
+app.set('view engine', 'ejs');
+
 app.get('/', (req,res) => {
     if(!req.session.authenticated) {
-    var html = `<h1>Welcome to the Archive</h1>
-        <form action='/signup' method='redirect'>
-            <button>Sign up</button>
-        </form>
-        <form action='/login' method='redirect'>
-            <button>Log in</button>
-        </form>
-        `
+        res.render("home_no_session");
     } else {
-        var html = `
-        <h1>Welcome to the Archive, ` + req.session.username+`</h1>
-        <form action='/members' method='redirect'>
-            <button>Go to members area</button>
-        </form>
-        <form action='/logout' method='redirect'>
-            <button>Log out</button>
-        </form>
-    `;
+        res.render("home_session", {user: req.session.username});
     }
-    res.send(html);
 });
 
 app.get('/signup', (req, res) => {
@@ -132,7 +118,7 @@ app.post('/submituser', async (req,res) => {
 
     var hashedPassword = await bcrypt.hash(password, saltRounds);
 
-	await userCollection.insertOne({username: username, email: email, password: hashedPassword});
+	await userCollection.insertOne({username: username, email: email, password: hashedPassword, user_type: 'user'});
 	console.log("Inserted user");
     req.session.authenticated = true;
     req.session.username = username;

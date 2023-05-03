@@ -1,0 +1,11 @@
+<%- include("templates/header") %>
+
+<h1>Welcome to the Archive, <%= user %></h1>
+<form action='/members' method='redirect'>
+    <button>Go to members area</button>
+</form>
+<form action='/logout' method='redirect'>
+    <button>Log out</button>
+</form>
+
+<%- include("templates/footer") %>
