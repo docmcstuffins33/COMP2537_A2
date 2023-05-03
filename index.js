@@ -48,6 +48,42 @@ app.use(session({
 
 app.set('view engine', 'ejs');
 
+function isValidSession(req) {
+    if (req.session.authenticated) {
+        return true;
+    }
+    return false;
+}
+
+function sessionValidation(req,res,next) {
+    if (isValidSession(req)) {
+        next();
+    }
+    else {
+        res.redirect('/');
+    }
+}
+
+
+function isAdmin(req) {
+    if (req.session.user_type == "admin") {
+        return true;
+    }
+    return false;
+}
+
+function adminAuthorization(req, res, next) {
+    if (!isAdmin(req)) {
+        res.redirect('/');
+        // res.status(403);
+        // res.render("errorMessage", {error: "Not Authorized"});
+        return;
+    }
+    else {
+        next();
+    }
+}
+
 app.get('/', (req,res) => {
     if(!req.session.authenticated) {
         res.render("home_no_session");
@@ -122,6 +158,7 @@ app.post('/submituser', async (req,res) => {
 	console.log("Inserted user");
     req.session.authenticated = true;
     req.session.username = username;
+    req.session.user_type = 'user';
 	req.session.email = email;
 	req.session.cookie.maxAge = expireTime;
     res.redirect('/members');
@@ -170,7 +207,7 @@ app.post('/loggingin', async (req,res) => {
 	   return;
 	}
 
-    const result = await userCollection.find({email: email}).project({email: 1, username: 1, password: 1, _id: 1}).toArray();
+    const result = await userCollection.find({email: email}).project({email: 1, username: 1, password: 1, user_type: 1, _id: 1}).toArray();
     console.log(result);
 	if (result.length != 1) {
 		res.redirect("/login?noAccount=true");
@@ -180,6 +217,7 @@ app.post('/loggingin', async (req,res) => {
 		console.log("correct password");
 		req.session.authenticated = true;
         req.session.username = result[0].username;
+        req.session.user_type = result[0].user_type;
 		req.session.email = email;
 		req.session.cookie.maxAge = expireTime;
 
@@ -197,10 +235,7 @@ app.get('/logout', (req,res) => {
     res.redirect('/');
 });
 
-app.get('/members', (req,res) => {
-    if (!req.session.authenticated) {
-        res.redirect('/');
-    }
+app.get('/members', sessionValidation, (req,res) => {
     var html = `
     <h1>Hello, ` + req.session.username +`!</h1>`;
     var cat = Math.floor(Math.random() * 10);
@@ -240,6 +275,10 @@ app.get('/members', (req,res) => {
             break;
     }
     res.send(html);
+});
+
+app.get("/admin", sessionValidation, adminAuthorization, (req,res)=> {
+    res.send("Admin Page :D");
 });
 
 app.use(express.static(__dirname + "/public"));
