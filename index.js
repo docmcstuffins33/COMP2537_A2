@@ -277,8 +277,10 @@ app.get('/members', sessionValidation, (req,res) => {
     res.send(html);
 });
 
-app.get("/admin", sessionValidation, adminAuthorization, (req,res)=> {
-    res.send("Admin Page :D");
+app.get("/admin", sessionValidation, adminAuthorization, async (req,res)=> {
+    const result = await userCollection.find().project({username: 1, user_type: 1, _id: 1}).toArray();
+
+    res.render("admin", {users: result});
 });
 
 app.use(express.static(__dirname + "/public"));
