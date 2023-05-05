@@ -1,8 +1,8 @@
-<li> <%= user.email %> : <%= user.user_type %>
+<li> <p><%= user.email %> : <%= user.user_type %></p>
 <form action='/promote?email=<%= user.email %>' method='post'>
-    <button class="btn">Promote to Admin</button>
+    <button class="btn btn-success my-2">Promote to Admin</button>
     </form>
     <form action='/demote?email=<%= user.email %>' method='post'>
-        <button class="btn">Demote to User</button>
+        <button class="btn btn-danger mb-4">Demote to User</button>
         </form>
     </li>
