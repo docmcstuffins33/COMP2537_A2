@@ -64,7 +64,6 @@ function sessionValidation(req,res,next) {
     }
 }
 
-
 function isAdmin(req) {
     if (req.session.user_type == "admin") {
         return true;
@@ -74,9 +73,8 @@ function isAdmin(req) {
 
 function adminAuthorization(req, res, next) {
     if (!isAdmin(req)) {
-        res.redirect('/');
-        // res.status(403);
-        // res.render("errorMessage", {error: "Not Authorized"});
+        res.status(403);
+        res.render("errorMessage", {error: "Not Authorized"});
         return;
     }
     else {
@@ -93,29 +91,8 @@ app.get('/', (req,res) => {
 });
 
 app.get('/signup', (req, res) => {
-
-    var html = `
-    <h1>Sign Up</h1>
-    <form action='/submituser' method='post'>
-    <input name='username' type='text' placeholder='username'>
-    <input name='email' type='email' placeholder='email'>
-    <input name='password' type='password' placeholder='password'>
-    <button>Submit</button>
-    </form>
-    `
-    if (req.query.anotherAccount){
-        html += ` <p>There is already another account using that email!</p>`
-    }
-    if (req.query.nameMissing){
-        html += ` <p>Username Missing</p>`
-    }
-    if (req.query.emailMissing){
-        html += ` <p>Email Missing</p>`
-    }
-    if (req.query.passwordMissing){
-        html += ` <p>Password Missing</p>`
-    }
-    res.send(html);
+    res.render("signup", {anotherAccount: req.query.anotherAccount, nameMissing: req.query.nameMissing, 
+        emailMissing: req.query.emailMissing, passwordMissing: req.query.passwordMissing})
 });
 
 app.post('/submituser', async (req,res) => {
@@ -165,27 +142,8 @@ app.post('/submituser', async (req,res) => {
 });
 
 app.get('/login', (req, res) => {
-    var html = `
-    <h1>Log In</h1>
-    <form action='/loggingin' method='post'>
-    <input name='email' type='email' placeholder='email'>
-    <input name='password' type='password' placeholder='password'>
-    <button>Submit</button>
-    </form>
-    `
-    if (req.query.noAccount){
-        html += ` <p>No account for this email!</p>`
-    }
-    if (req.query.wrongPassword){
-        html += ` <p>Incorrect password for this account</p>`
-    }
-    if (req.query.emailMissing){
-        html += ` <p>Email Missing</p>`
-    }
-    if (req.query.passwordMissing){
-        html += ` <p>Password Missing</p>`
-    }
-    res.send(html);
+    res.render("login", {noAccount: req.query.noAccount, wrongPassword: req.query.wrongPassword,
+    emailMissing: req.query.emailMissing, passwordMissing: req.query.passwordMissing});
 });
 
 app.post('/loggingin', async (req,res) => {
@@ -236,51 +194,25 @@ app.get('/logout', (req,res) => {
 });
 
 app.get('/members', sessionValidation, (req,res) => {
-    var html = `
-    <h1>Hello, ` + req.session.username +`!</h1>`;
-    var cat = Math.floor(Math.random() * 10);
-    switch (cat) {
-        case 0:
-            html += `<img src='/5.jpg' style='width:250px;'>`
-            break;
-        case 1:
-            html += `<img src='/6_dollar.jpg' style='width:250px;'>`
-            break;
-        case 2:
-            html += `<img src='/8_13_AM.jpg' style='width:250px;'>`
-            break;
-        case 3:
-            html += `<img src='/amazed.gif' style='width:250px;'>`
-            break;
-        case 4:
-            html += `<img src='/BLEEEGHHH.png' style='width:250px;'>`
-            break;
-        case 5:
-            html += `<img src='/cat_staring.gif' style='width:250px;'>`
-            break;
-        case 6:
-            html += `<img src='/god.png' style='width:250px;'>`
-            break;
-        case 7:
-            html += `<img src='/learn_more.png' style='width:250px;'>`
-            break;
-        case 8:
-            html += `<img src='/most_wanted.png' style='width:250px;'>`
-            break;
-        case 9:
-            html += `<img src='/standing.gif' style='width:250px;'>`
-            break;
-        default:
-            htmp += '<h2>Something went wrong while generating a cat... </h2>'
-            break;
-    }
-    res.send(html);
+    res.render("members", {username: req.session.username});
 });
 
 app.get("/admin", sessionValidation, adminAuthorization, async (req,res)=> {
-    const result = await userCollection.find().project({username: 1, user_type: 1, _id: 1}).toArray();
+    const result = await userCollection.find().project({username: 1, email: 1, user_type: 1, _id: 1}).toArray();
 
     res.render("admin", {users: result});
+});
+
+app.post('/promote', async(req,res) => {
+    var email = req.query.email;
+    await userCollection.updateOne({email: email}, {$set: {user_type: 'admin'}});
+    res.redirect('/admin');
+});
+
+app.post('/demote', async(req,res) => {
+    var email = req.query.email;
+    await userCollection.updateOne({email: email}, {$set: {user_type: 'user'}});
+    res.redirect('/admin');
 });
 
 app.use(express.static(__dirname + "/public"));
