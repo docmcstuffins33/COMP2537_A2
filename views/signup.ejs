@@ -1,12 +1,25 @@
 <%- include("templates/header") %>
 <div class="container">
 <h1>Sign Up</h1>
-<form class="mb-4 container" action='/submituser' method='post'>
-<input class="row" name='username' type='text' placeholder='username'>
-<input class="row" name='email' type='email' placeholder='email'>
-<input class="row" name='password' type='password' placeholder='password'>
-<button class="row">Submit</button>
-</form>
+<div class="row container">
+    <form class="mb-4 container col" action='/submituser' method='post'>
+        <div class="mb-3 row-1">
+            <label for="username" class="form-label">Username</label>
+            <input name="username" type="text" class="form-control" id="username">
+          </div>
+        <div class="mb-3 row-2">
+            <label for="exampleInputEmail1" class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" id="exampleInputEmail1">
+          </div>
+          <div class="mb-3 row-3">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <input name="password" type="password" class="form-control" id="exampleInputPassword1">
+          </div>
+          <button type="submit" class="btn btn-primary row-3">Submit</button>
+    </form>
+    <div class="col"></div>
+    <div class="col"></div>
+</div>
 
 <% if (anotherAccount){ %>
     <p class="text-danger">There is already another account using that email!</p>

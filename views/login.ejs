@@ -2,11 +2,21 @@
 
 <div class="container">
 <h1>Log In</h1>
-    <form class="mb-4 container" action='/loggingin' method='post'>
-    <input class="row" name='email' type='email' placeholder='email'>
-    <input class="row" name='password' type='password' placeholder='password'>
-    <button class="row">Submit</button>
+<div class="row container">
+    <form class="mb-4 container col" action='/loggingin' method='post'>
+        <div class="mb-3 row-1">
+            <label for="exampleInputEmail1" class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" id="exampleInputEmail1">
+          </div>
+          <div class="mb-3 row-2">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <input name="password" type="password" class="form-control" id="exampleInputPassword1">
+          </div>
+          <button type="submit" class="btn btn-primary row-3">Submit</button>
     </form>
+    <div class="col"></div>
+    <div class="col"></div>
+</div>
 
     <% if (noAccount){ %>
         <p class="text-danger">No account for this email!</p>
